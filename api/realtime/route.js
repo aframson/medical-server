@@ -13,6 +13,6 @@ module.exports = function (io) {
          /**
           * Routes begins here 
           */
-         require('./services/users')(socket,io) // this is a route to the users API in the ./service folder
+         require('./services/dashboard')(socket,io) // this is a route to the users API in the ./service folder
     })
 }

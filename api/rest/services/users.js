@@ -19,14 +19,14 @@ const {basicAuth} = require('../../../settings/middlewares/index')
 const local_connection = require('../../../settings/configs/database/mysql/connection')
 
 
-module.exports = function userEndpoint() {
+module.exports = function userEndpoint(io) {
     
     // fetch user endpoint
     router.get('/fetch',basicAuth,async(req,res,next)=>{
        res.status(200).send(userData)
     })
 
-    // add user data and get realtime response on listerning to 'fetch-user'
+   
     router.post('/add',basicAuth,async (req,res,next)=>{
         const {fname,lname,email,phone,specialty,dob,password,type} = req.body;
         let query = `INSERT INTO users(fname,lname,email,phone,specialty,dob,password,type) VALUES ('${fname}','${lname}','${email}','${phone}','${specialty}','${dob}','${password}','${type}')`
@@ -34,7 +34,23 @@ module.exports = function userEndpoint() {
             if (error) {
                 res.status(404).send(error)
             } else {
-               res.status(200).send(results)
+                let query = type === 'doc'?`SELECT * FROM users WHERE type='doc'`:`SELECT * FROM users WHERE type='user'`;
+                local_connection.query(query, function (error, results, fields) {
+                    if (error) {
+                        res.status(404).send(error)
+                    } else {
+                       res.status(200).send(results)
+                       let number = results.length
+                       if(type === 'doc'){
+                        io.emit('count-doc',number)
+                       }else{
+                        io.emit('count-user',number)
+                       }
+                    }  
+                });
+
+
+               
             }
         });
     })
@@ -47,7 +63,7 @@ module.exports = function userEndpoint() {
                 res.status(404).send(error)
             } else {
                res.status(200).send(results)
-            }
+            }  
         });
     })
 
