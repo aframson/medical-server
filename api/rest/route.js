@@ -6,6 +6,6 @@
  */
  module.exports = function(leaf,io){
 
-    leaf.use('/users',require('./services/users')()) // takes url with http://localhost/users/...
+    leaf.use('/users',require('./services/users')(io)) // takes url with http://localhost/users/...
 
 }
